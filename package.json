@@ -1,10 +1,10 @@
 {
-  "name": "mini-http",
+  "name": "min-http",
   "version": "1.0.0",
   "description": "",
   "main": "src/server.js",
   "bin": {
-    "mini-http": "./bin/server"
+    "min-http": "./bin/server"
   },
   "scripts": {
     "build": "rollup -c bin.config.js",
