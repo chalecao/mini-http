@@ -50,6 +50,10 @@ function handleRequest(request, response) {
                     response.writeHead(200, {
                         'Content-Type': 'image/svg+xml; charset=utf-8'
                     });
+                } else if (filePath.indexOf("css") > 0) {
+                    response.writeHead(200, {
+                        'Content-Type': 'text/css'
+                    });
                 } else {
                     response.writeHead(200, {
                         "Access-Control-Allow-Origin": "*",
