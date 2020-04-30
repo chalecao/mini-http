@@ -103,8 +103,9 @@ function handleRequest(request, response) {
     });
 }
 var createServer = function (config) {
+    console.log(config);
     currentDir = config.path || currentDir;
-    port = +(config.port || port);
+    var port = +(config.port);
     var server = http.createServer(handleRequest).listen(port);
     dns.lookup(os.hostname(), function (err, addr, fam) {
         if ( addr === void 0 ) addr = "127.0.0.1";
@@ -118,46 +119,45 @@ var createServer = function (config) {
     return server;
 };
 
-
-opts.parse([{
-    short: "v",
-    long: "version",
-    description: "Show the version",
-    required: false,
-    callback: function () {
-        console.log(version);
-        return process.exit(1);
-    }
-}, {
-    short: "p",
-    long: "port",
-    description: "Specify the port",
-    value: true,
-    required: false
-}], true);
-
-var port = opts.get('port') || 8888;
-var dir = path.resolve(process.argv[2]) || currentDir;
-var server = createServer({
-    port: port,
-    path: dir
-});
-console.log("Starting server for " + dir + " ......");
 // 管理连接
 var sockets = [];
-server.on("connection", function (socket) {
-    sockets.push(socket);
-    socket.once("close", function () {
-        sockets.splice(sockets.indexOf(socket), 1);
+
+var start = function () {
+    opts.parse([{
+        short: "v",
+        long: "version",
+        description: "Show the version",
+        required: false,
+        callback: function () {
+            console.log(version);
+            return process.exit(1);
+        }
+    }, {
+        short: "p",
+        long: "port",
+        description: "Specify the port",
+        value: true,
+        required: false
+    }], true);
+
+    var port = opts.get('port');
+    var dir = path.resolve(process.argv[2]) || currentDir;
+    var server = createServer({
+        port: port || 8888,
+        path: dir
     });
-});
-//关闭之前，我们需要手动清理连接池中得socket对象
-function closeServer() {
-    sockets.forEach(function (socket) {
-        socket.destroy();
+    console.log("Starting server for " + dir + " ......");
+
+    server.on("connection", function (socket) {
+        sockets.push(socket);
+        socket.once("close", function () {
+            sockets.splice(sockets.indexOf(socket), 1);
+        });
     });
-    server.close(function () {
-        console.log("close server!");
-    });
-}
-module.exports = closeServer;
+
+};
+
+/**
+ * a min HTTP server in node
+ */
+start();

@@ -99,8 +99,9 @@ function handleRequest(request, response) {
     });
 }
 let createServer = function (config) {
+    // console.log(config)
     currentDir = config.path || currentDir;
-    port = +(config.port || port);
+    let port = +(config.port);
     let server = http.createServer(handleRequest).listen(port);
     dns.lookup(os.hostname(), function (err, addr = "127.0.0.1", fam) {
         console.log('server Running at http://' + addr + ((port == 80) ? '' : (':' + port)) + '/');
@@ -112,46 +113,50 @@ let createServer = function (config) {
     return server;
 }
 
-
-opts.parse([{
-    short: "v",
-    long: "version",
-    description: "Show the version",
-    required: false,
-    callback: function () {
-        console.log(version);
-        return process.exit(1);
-    }
-}, {
-    short: "p",
-    long: "port",
-    description: "Specify the port",
-    value: true,
-    required: false
-}], true);
-
-let port = opts.get('port') || 8888;
-let dir = path.resolve(process.argv[2]) || currentDir;
-let server = createServer({
-    port: port,
-    path: dir
-});
-console.log("Starting server for " + dir + " ......");
 // 管理连接
 var sockets = [];
-server.on("connection", function (socket) {
-    sockets.push(socket);
-    socket.once("close", function () {
-        sockets.splice(sockets.indexOf(socket), 1);
+
+export const start = () => {
+    opts.parse([{
+        short: "v",
+        long: "version",
+        description: "Show the version",
+        required: false,
+        callback: function () {
+            console.log(version);
+            return process.exit(1);
+        }
+    }, {
+        short: "p",
+        long: "port",
+        description: "Specify the port",
+        value: true,
+        required: false
+    }], true);
+
+    let port = opts.get('port');
+    let dir = path.resolve(process.argv[2]) || currentDir;
+    let server = createServer({
+        port: port || 8888,
+        path: dir
     });
-});
-//关闭之前，我们需要手动清理连接池中得socket对象
-function closeServer() {
+    console.log("Starting server for " + dir + " ......");
+
+    server.on("connection", function (socket) {
+        sockets.push(socket);
+        socket.once("close", function () {
+            sockets.splice(sockets.indexOf(socket), 1);
+        });
+    });
+
+}
+export const close = () => {
+    //关闭之前，我们需要手动清理连接池中得socket对象
     sockets.forEach(function (socket) {
         socket.destroy();
     });
     server.close(function () {
         console.log("close server!");
     });
-}
-module.exports = closeServer;
+};
+

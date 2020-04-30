@@ -1,7 +1,7 @@
 import buble from 'rollup-plugin-buble'
 
 export default {
-    input: 'src/server.js',
+    input: 'src/bin.js',
     output: {
         file: 'bin/server',
         format: 'cjs'
