@@ -7,6 +7,8 @@ import fs from 'fs'
 import path from "path"
 import opts from "opts"
 import pjson from "pjson";
+import dns from 'dns';
+import os from 'os';
 
 let version = pjson.version,
     // __dirname 获取的是当前软件的路径，是内置变量；process.cwd()获取的是当前命令行目录
@@ -100,7 +102,7 @@ let createServer = function (config) {
     currentDir = config.path || currentDir;
     port = +(config.port || port);
     let server = http.createServer(handleRequest).listen(port);
-    require('dns').lookup(require('os').hostname(), function (err, addr, fam) {
+    dns.lookup(os.hostname(), function (err, addr = "127.0.0.1", fam) {
         console.log('server Running at http://' + addr + ((port == 80) ? '' : (':' + port)) + '/');
     })
     if (config.start == "true") {

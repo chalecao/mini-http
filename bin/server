@@ -9,6 +9,8 @@ var fs = _interopDefault(require('fs'));
 var path = _interopDefault(require('path'));
 var opts = _interopDefault(require('opts'));
 var pjson = _interopDefault(require('../package.json'));
+var dns = _interopDefault(require('dns'));
+var os = _interopDefault(require('os'));
 
 /**
  * a min HTTP server in node
@@ -104,7 +106,9 @@ var createServer = function (config) {
     currentDir = config.path || currentDir;
     port = +(config.port || port);
     var server = http.createServer(handleRequest).listen(port);
-    require('dns').lookup(require('os').hostname(), function (err, addr, fam) {
+    dns.lookup(os.hostname(), function (err, addr, fam) {
+        if ( addr === void 0 ) addr = "127.0.0.1";
+
         console.log('server Running at http://' + addr + ((port == 80) ? '' : (':' + port)) + '/');
     });
     if (config.start == "true") {
